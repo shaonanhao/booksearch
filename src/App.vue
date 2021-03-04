@@ -4,10 +4,7 @@
       <h1>图书检索系统</h1>
     </div>
     <div class="searchPlace">
-      <hello-world
-        v-bind:keyword="keyword"
-        @startsearch="startsearch"
-      ></hello-world>
+      <search-box @startSearch="startSearch"></search-box>
     </div>
     <div class="placetable">
       <table id="table">
@@ -17,7 +14,7 @@
           <th>出版</th>
           <th>数量</th>
         </tr>
-        <tr v-for="(item, index) of datashow" :key="index">
+        <tr v-for="(item, index) of dataShow" :key="index">
           <td>{{ item.bname }}</td>
           <td>{{ item.sprice }}</td>
           <td>{{ item.spbs }}</td>
@@ -26,30 +23,25 @@
       </table>
     </div>
     <div class="placechange">
-    <select v-model="pcNum">
-      <option v-for="(item, index) in pcArr" :key="index" :value="item.pcNum">
-        {{ item.pcNum }}
-      </option>
-    </select>
-    <input type="button" value="上一页" @click="PrePage" />
-    <span id="pages"
-      >当前第{{ currentPage + 1 }}页/总共{{
-        Math.ceil(this.newres.length / this.pcNum)
-      }}页</span
-    >
-    <input type="button" value="下一页" @click="NextPage" />
-  </div>
+      <divide
+        v-bind:currentPage="currentPage"
+        v-bind:totalNum="this.filter.length"
+        @pageChange="pageChange"
+      ></divide>
+      <span id="pages"
+        >当前第{{ currentPage + 1 }}页/总共{{Math.ceil(this.filter.length/this.pageSize)}}页</span>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/Helloworld";
-// import PlaceTable from "./components/PlaceTable";
+import Divide from "./components/Divide.vue";
+import SearchBox from "./components/SearchBox";
 export default {
   name: "App",
   components: {
-    HelloWorld,
-    // PlaceTable,
+    SearchBox,
+    Divide,
   },
   data() {
     return {
@@ -121,30 +113,34 @@ export default {
       ],
       //定义子组件里传来的关键词
       keyword: "",
-      //定义一个新数组，用来装搜索之后的数组
-      newers: [],
-      //进行下拉列表的一系列初始设定
-      pcNum: "5",
-      pcArr: [
-        { id: 3, pcNum: "3" },
-        { id: 4, pcNum: "4" },
-        { id: 5, pcNum: "5" },
-        { id: 6, pcNum: "6" },
-        { id: 7, pcNum: "7" },
-      ],
-      currentPage:0
+      pageSize: 5,
+      currentPage: 0,
     };
   },
   methods: {
     //通过点击搜索将关键词从子组件传递给父组件
-    startsearch: function (keyword) {
+    startSearch: function (keyword) {
       this.keyword = keyword;
-      this.currentPage = 0
+      this.currentPage = 0;
     },
-    //获得关键词，将其与数组进行对比，完成搜索输出新数组
-    Search: function (keyword) {
-      const keywordsExp = new RegExp(".*?" + keyword + ".*?", "img");
-      const newresplus = this.list.filter(
+    pageChange: function (choice,pageNum) {
+      this.pageSize = pageNum;
+      if(choice ==1){
+        this.currentPage --;
+      }
+      if (choice ==2) {
+        this.currentPage ++;
+      }
+      if(choice == 0){
+        this.currentPage = 0;
+      }
+    },
+  },
+  computed: {
+    //根据conputed关键词改变而改变过滤的数组
+    filter: function () {
+      const keywordsExp = new RegExp(".*?" + this.keyword + ".*?", "img");
+      const newresPlus = this.list.filter(
         (v) =>
           keywordsExp.test(v.bname) ||
           keywordsExp.test(v.sprice) ||
@@ -152,40 +148,22 @@ export default {
           keywordsExp.test(v.sumber) ||
           keywordsExp.test(v.keywd)
       );
-      return (this.newres = [...newresplus]);
+      return newresPlus;
     },
-     PrePage: function () {
-      if (this.currentPage <= 0) {
-        alert("已经是最前面了");
-      } else {
-        this.currentPage--;
-        return this.datashow;
-      }
-    },
-    NextPage: function () {
-      if (this.currentPage >= Math.ceil(this.newres.length / this.pcNum) - 1) {
-        alert("后面已经没有了");
-      } else {
-        this.currentPage++;
-        return this.datashow;
-      }
-    },
-  },
-  computed: {
     //计算属性datashow，将筛选出的新数组进行分页并展示
-    datashow: function () {
-      this.Search(this.keyword);
-      let start = this.currentPage * this.pcNum;
+    dataShow: function () {
+      let start = this.currentPage * this.pageSize;
       let end = Math.min(
-        (this.currentPage + 1) * this.pcNum,
-        this.newres.length
+        (this.currentPage + 1) * this.pageSize,
+        this.filter.length
       );
-      console.log(this.keyword);
-      console.log(start);
-      console.log(end);
-      console.log(this.newres);
-      return this.newres.slice(start, end);
+      // console.log(this.keyword);
+      // console.log(start);
+      // console.log(end);
+      // console.log(this.filter);
+      return this.filter.slice(start, end);
     },
+
   },
 };
 </script>

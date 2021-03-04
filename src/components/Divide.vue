@@ -1,52 +1,58 @@
 <template>
   <div id="Divide">
-    <select v-model="pcNum">
-      <option v-for="(item, index) in pcArr" :key="index" :value="item.pcNum">
-        {{ item.pcNum }}
+    <select v-model="pageNum">
+      <option v-for="(item, index) in pcArr" :key="index" :value="item.pageNum">
+        {{ item.pageNum }}
       </option>
     </select>
-    <input type="button" value="上一页" @click="PrePage" />
-    <span id="pages"
-      >当前第{{ currentPage + 1 }}页/总共{{
-        Math.ceil(this.newres.length / this.pcNum)
-      }}页</span
-    >
-    <input type="button" value="下一页" @click="NextPage" />
+    <input type="button" value="上一页" @click="prePage" />
+    <input type="button" value="下一页" @click="nextPage" />
   </div>
 </template>
 
 <script>
-
 export default {
-  name: 'Divide',
-  props: ["length"],
-  data(){
-    return{
-       pcNum: "5",
+  name: "Divide",
+  props: ["currentPage", "totalNum"],
+  data() {
+    return {
+      pageNum: "5",
       pcArr: [
-        { id: 3, pcNum: "3" },
-        { id: 4, pcNum: "4" },
-        { id: 5, pcNum: "5" },
-        { id: 6, pcNum: "6" },
-        { id: 7, pcNum: "7" },
+        { id: 3, pageNum: "3" },
+        { id: 4, pageNum: "4" },
+        { id: 5, pageNum: "5" },
+        { id: 6, pageNum: "6" },
+        { id: 7, pageNum: "7" },
       ],
-      }
+      choice: "",
+    };
   },
-  methods:{
-     PrePage: function () {
-      this.$emit("prepage")
+  watch: {
+    pageNum: function () {
+      this.$emit("pageChange", this.choice, this.pageNum);
     },
-    NextPage: function () {
-        this.$emit("nextpage")
-    //   if (this.currentPage >= Math.ceil(this.newres.length / this.pcNum) - 1) {
-    //     alert("后面已经没有了");
-    //   } else {
-    //     this.currentPage++;
-    //     return this.datashow;
-    //   }
+  },
+  methods: {
+    prePage: function () {
+      if (this.currentPage > 0) {
+        this.choice = 1;
+      } else {
+        alert("已经到头了");
+      }
+      this.$emit("pageChange", this.choice, this.pageNum);
+      this.choice = 0;
     },
-  }
-}
+    nextPage: function () {
+      if (this.currentPage >= Math.ceil(this.totalNum / this.pageNum) - 1) {
+        alert("后面已经没有了");
+      } else {
+        this.choice = 2;
+      }
+      this.$emit("pageChange", this.choice, this.pageNum);
+      this.choice = 0;
+    },
+  },
+};
 </script>
 
 
