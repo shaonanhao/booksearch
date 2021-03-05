@@ -29,6 +29,7 @@ export default {
   },
   watch: {
     pageNum: function () {
+      this.choice = 0;
       this.$emit("pageChange", this.choice, this.pageNum);
     },
   },
